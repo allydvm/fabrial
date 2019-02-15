@@ -1,6 +1,6 @@
 # Fabrial
 
-COMMING SOON
+COMING SOONISH
 
 Fabrial makes it easy and pleasant to create your test data, directly inline
 with your tests, removing the need for hard to maintain fixture files or
