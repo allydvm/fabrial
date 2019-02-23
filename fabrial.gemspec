@@ -13,7 +13,7 @@ Gem::Specification.new do |spec|
   spec.summary       = 'Simply create test data inline with your tests'
   spec.description   = <<~DESCRIPTION
     Fabrial makes it easy and pleasant to create your test data, directly inline
-    with your tests, removing the need for hard to maintain fixture files or
+    with your tests, removing the need for hard-to-maintain fixture files or
     blueprints.
   DESCRIPTION
 
