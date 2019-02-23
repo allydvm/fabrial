@@ -1,0 +1,65 @@
+AllCops:
+  DisplayCopNames: true
+  DisplayStyleGuide: true
+  ExtraDetails: true
+
+Layout/EmptyLineAfterGuardClause: { Enabled: true }
+
+# Defaults to 79, cut us a little slack
+LineLength: { Max: 89 }
+
+# This only checks that classes have a documentation comment, don't want that
+# as a requirement
+Documentation: { Enabled: false }
+
+# Defaults to 10, be a bit more lenient
+MethodLength: { Max: 40 }
+
+# Defaults to 100, we relax it a bit.
+Metrics/ModuleLength: { Max: 150 }
+Metrics/ClassLength: { Max: 150 }
+
+# Cut a bit more slack, but still warn on overly complex functions
+CyclomaticComplexity: { Max: 10 }
+
+# Up the allowed complexity a little
+PerceivedComplexity: { Max: 10 }
+
+# Increase max function size
+AbcSize: { Max: 50 }
+
+# This prevents method chaining if the function takes a multiline block.
+# They should be used carefully/spairingly to maintain readability, but in
+# general they are ok.
+MultilineBlockChain: { Enabled: false }
+
+TrailingCommaInArrayLiteral: { EnforcedStyleForMultiline: comma }
+
+# Use [] for array % literals that create arrays, () for ones that create single
+# items, and {} for regex
+PercentLiteralDelimiters:
+  PreferredDelimiters:
+    '%':  ()
+    '%i': '[]'
+    '%q': ()
+    '%Q': ()
+    '%r': '{}'
+    '%s': ()
+    '%w': '[]'
+    '%W': '[]'
+    '%x': ()
+
+FirstParameterIndentation: { EnforcedStyle: consistent }
+
+MultilineOperationIndentation: { EnforcedStyle: indented }
+
+# `MinBodyLength` defines the number of lines of the a body of an if / unless
+# needs to have to trigger this cop
+GuardClause: { MinBodyLength: 3 }
+
+MultilineMethodCallIndentation: { EnforcedStyle: indented }
+
+IndentArray: { EnforcedStyle: consistent }
+
+# Sometimes nesting if's can greatly improve readability
+IfInsideElse: { Enabled: false }
