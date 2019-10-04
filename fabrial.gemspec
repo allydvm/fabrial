@@ -12,9 +12,9 @@ Gem::Specification.new do |spec|
 
   spec.summary       = 'Simply create test data inline with your tests'
   spec.description   = <<~DESCRIPTION
-    Fabrial makes it easy and pleasant to create your test data, directly inline
-    with your tests, removing the need for hard-to-maintain fixture files or
-    blueprints.
+    Fabrial makes it easy to follow the "Arrange, Act, Assert" pattern in your tests.
+    It makes it trivial to create your test data directly inline with your tests; 
+    removing the need for hard-to-maintain fixture files or blueprints.
   DESCRIPTION
 
   spec.homepage      = 'https://github.com/allydvm/fabrial'
@@ -37,7 +37,11 @@ Gem::Specification.new do |spec|
   spec.executables   = spec.files.grep(%r{^exe/}) { |f| File.basename(f) }
   spec.require_paths = ['lib']
 
-  spec.add_development_dependency 'bundler', '~> 1.17.3'
-  spec.add_development_dependency 'minitest', '~> 5.0'
-  spec.add_development_dependency 'rake', '~> 10.0'
+  spec.required_ruby_version = '>= 2.2.0'
+
+  spec.add_development_dependency 'appraisal', '~> 2.2', '>= 2.2.0'
+  spec.add_development_dependency 'bundler', '~> 2.0', '>= 2.0.2'
+  spec.add_development_dependency 'minitest', '~> 5.12', '>= 5.12.2'
+  spec.add_development_dependency 'rake', '~> 13.0'
+  spec.add_development_dependency 'rubocop', '~> 0.75.0'
 end
