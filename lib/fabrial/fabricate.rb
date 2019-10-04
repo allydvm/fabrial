@@ -76,7 +76,10 @@ module Fabrial::Fabricate
 
   def make_type(klass, data_list, ancestors)
     returns = []
-    ::Maker.next_bank klass # Needed if we aren't in test
+
+    # TODO: may need a hook here
+    # ::Maker.next_bank klass # Needed if we aren't in test
+
     associations = collect_associations(klass, ancestors)
     Array.wrap(data_list).each do |data|
       should_return = data.delete :RETURN
@@ -110,7 +113,7 @@ module Fabrial::Fabricate
     type_col = klass.inheritance_column.try :to_sym
     type = data.delete(type_col).try :safe_constantize
     type ||= klass
-    type.make! data.reverse_merge associations
+    create type, data.reverse_merge(associations)
   end
 
   def collect_associations(klass, ancestors)
@@ -137,10 +140,17 @@ module Fabrial::Fabricate
           # over the field.
           type.is_a?(Class) ||
 
-            !klass.column_names_including_stored.include?(type.to_s)
+            !column_names(klass).include?(type.to_s)
         )
     end
     data.extract!(*children.keys)
+  end
+
+  def column_names(klass)
+    klass.column_names
+
+    # our project uses
+    klass.column_names_including_stored
   end
 
   def add_implicit_owner(klass, ancestors, children)
@@ -174,13 +184,13 @@ module Fabrial::Fabricate
           end
       end
       .select { |a| ancestors.key? a.klass } # Find ancestors that match
-      .mash do |a| # Create data hash
+      .map do |a| # Create data hash
         if a.macro == :has_and_belongs_to_many
           [a.name, [ancestors[a.klass]]]
         else
           [a.name, ancestors[a.klass]]
         end
-      end
+      end.to_h
   end
 
   def polymorphic(klass)
