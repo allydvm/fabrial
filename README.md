@@ -1,6 +1,8 @@
 # Fabrial
 
 ![Travis (.org)](https://img.shields.io/travis/allydvm/fabrial)
+![GitHub](https://img.shields.io/github/license/allydvm/fabrial)
+![Gem](https://img.shields.io/gem/v/fabrial)
 
 Fabrial makes it easy and pleasant to create your test data, directly inline
 with your tests, removing the need for hard to maintain fixture files or
