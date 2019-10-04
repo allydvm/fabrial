@@ -3,9 +3,9 @@
 # TODO: properly hook up parent associations for pre-created objects passed in
 # TODO: Split out the default practice and sync client into its own file
 
-module Fabrial
+module Fabrial::Fabricate
   # Make expects a nested hash of type => data or [data]
-  def self.fabricate(objects)
+  def fabricate(objects)
     # TODO: Raise error if mixing array and hash return styles
 
     # If a return object(s) wasn't specified, default to returning the first
