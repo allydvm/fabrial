@@ -2,12 +2,14 @@
 
 require 'test_helper'
 
-class FabrialTest < Minitest::Test
-  def test_that_it_has_a_version_number
-    refute_nil ::Fabrial::VERSION
-  end
+class FabrialTest < ActiveSupport::TestCase
+  describe 'ensure that the test suite is configured correctly' do
+    test 'truth' do
+      assert true
+    end
 
-  def test_it_does_something_useful
-    assert true
+    test 'version' do
+      refute_nil ::Fabrial::VERSION
+    end
   end
 end
