@@ -6,3 +6,7 @@
 /pkg/
 /spec/reports/
 /tmp/
+
+# Appraisal gemfiles
+/gemfiles/.bundle/
+/gemfiles/*.gemfile.lock

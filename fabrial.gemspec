@@ -39,6 +39,8 @@ Gem::Specification.new do |spec|
 
   spec.required_ruby_version = '>= 2.3.8'
 
+  spec.add_dependency 'activerecord', '> 4.2.0', '< 6.0'
+
   spec.add_development_dependency 'appraisal', '~> 2.2', '>= 2.2.0'
   spec.add_development_dependency 'bundler', '~> 1.0'
   spec.add_development_dependency 'minitest', '~> 5.12', '>= 5.12.2'
@@ -46,4 +48,5 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'minitest-reporters', '~> 1.3', '>= 1.3.8'
   spec.add_development_dependency 'rake', '~> 13.0'
   spec.add_development_dependency 'rubocop', '~> 0.75.0'
+  spec.add_development_dependency 'sqlite3', '~> 1.3.0'
 end
