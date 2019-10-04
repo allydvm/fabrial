@@ -1,43 +1,223 @@
+inherit_mode:
+  merge:
+    - Exclude
+    - Include
+    - Whitelist
+    - Blacklist
+
 AllCops:
-  DisplayCopNames: true
   DisplayStyleGuide: true
   ExtraDetails: true
+  EnabledByDefault: true # Turn on all the cops!!
+  TargetRubyVersion: 2.6
 
-Layout/EmptyLineAfterGuardClause: { Enabled: true }
+# Cops
+# ---------------------------------------------
 
-# Defaults to 79, cut us a little slack
-LineLength: { Max: 89 }
+#################### Layout ###########################
 
-# This only checks that classes have a documentation comment, don't want that
-# as a requirement
-Documentation: { Enabled: false }
+# I would like to turn this on, but the exception handling isn't good enough.
+# It raises an offense on the first definition that doesn't match the config,
+# and although you can disable there, if it is an earlier definition that threw
+# it off, there's no way to disable the actual exceptional case.
+#
+# For example:
+#
+# has_many :dashboards, through: :packages
+#
+# # rubocop:disable ClassStructure <-- this disable doesn't help
+# has_one :configuration, class_name: 'PracticeConfiguration'
+# # Dynamic alias to catch method override below
+# def practice_configuration # <-- out of order definition
+#   configuration
+# end
+# # rubocop:enable ClassStructure
+#
+# delegate :time_zone, to: :source # <-- offense raised here
+#
+# We'll want to keep an eye on this and see if it gets more capable over time.
+Layout/ClassStructure:
+  Enabled: false
 
-# Defaults to 10, be a bit more lenient
-MethodLength: { Max: 40 }
+# I would like to turn this on, but it doesn't support two line method calls,
+# and wants to turn this:
+#
+# method(really_long_parameter_name, really_long_parameter_name,
+#   really_long_parameter_name, really_long_parameter_name)
+#
+# into this:
+#
+# method(
+#   really_long_parameter_name,
+#   really_long_parameter_name,
+# )
+#
+# At three lines I would like to switch styles, but two is too early
+#
+# I have opened an issue here: https://github.com/bbatsov/rubocop/issues/3393.
+# If it is resolved, we can turn this on.
+Layout/FirstMethodParameterLineBreak: { Enabled: false }
+
+# These are similar to the above FirstMethodParameterLineBreak
+Layout/FirstArrayElementLineBreak: { Enabled: false }
+Layout/FirstHashElementLineBreak: { Enabled: false }
+Layout/FirstMethodArgumentLineBreak: { Enabled: false }
+Layout/MultilineMethodArgumentLineBreaks: { Enabled: false }
+Layout/MultilineArrayLineBreaks: { Enabled: false }
+Layout/MultilineHashKeyLineBreaks: { Enabled: false }
+
+# This requires that function calls spanning multiple lines have the parameters
+# line up.  I only care if they are indented a little further.
+Layout/AlignParameters: { Enabled: false }
+
+# This requires that hashes spanning multiple lines have the elements
+# line up.  I only care if they are indented a little further.
+Layout/AlignHash: { Enabled: false }
+
+# This requires that arrays spanning multiple lines have the elements
+# line up.  I only care if they are indented a little further.
+Layout/AlignArray: { Enabled: false }
+
+Layout/MultilineAssignmentLayout: { Enabled: false } # Agreed, should be disabled
+
+Layout/IndentFirstArrayElement: { EnforcedStyle: consistent }
+
+Layout/EmptyLineBetweenDefs:
+  # If `true`, this parameter means that single line method definitions don't
+  # need an empty line between them.
+  AllowAdjacentOneLineDefs: true
+
+# Sometimes we want to comment the arguments to a method and therefore need a
+# blank line separating the commented arg from the rest.  This would prevent
+# that.
+Layout/EmptyLinesAroundArguments: { Enabled: false }
+
+# I would force the default mode `with_first_argument`, for all calls over 2
+# lines if I could.
+Layout/AlignArguments: { EnforcedStyle: with_fixed_indentation }
+
+Layout/IndentFirstArgument: { EnforcedStyle: consistent }
+
+Layout/MultilineOperationIndentation: { EnforcedStyle: indented }
+
+Layout/MultilineMethodCallIndentation: { EnforcedStyle: indented }
+
+#################### Lint ##################################
+
+# This wants us to rewrite things like
+#
+# assert categories.any? { |c| c.appointment_category_id == 'GRM' }
+#
+# with
+#
+# assert(categories.any? { |c| c.appointment_category_id == 'GRM' })
+#
+# I don't like the extra parenthesis and expect our devs to know block
+# precedence.
+Lint/AmbiguousBlockAssociation: { Enabled: false }
+
+Lint/NumberConversion: { Enabled: false } # I like `.to_i`
+
+# Ignoring implicit references allows us to use the implicit passing of an
+# argument to `super` to count as an argument reference, without causing an
+# offense.
+Lint/ShadowedArgument: { IgnoreImplicitReferences: true }
+
+#################### Metrics ###############################
 
 # Defaults to 100, we relax it a bit.
 Metrics/ModuleLength: { Max: 150 }
 Metrics/ClassLength: { Max: 150 }
 
+# Defaults to 79, cut us a little slack
+Metrics/LineLength: { Max: 89 }
+
+# Defaults to 10, functions can be longer than 10 lines!!!
+Metrics/MethodLength: { Max: 40 }
+
 # Cut a bit more slack, but still warn on overly complex functions
-CyclomaticComplexity: { Max: 10 }
+Metrics/CyclomaticComplexity: { Max: 10 }
 
 # Up the allowed complexity a little
-PerceivedComplexity: { Max: 10 }
+Metrics/PerceivedComplexity: { Max: 10 }
 
 # Increase max function size
-AbcSize: { Max: 50 }
+Metrics/AbcSize: { Max: 50 }
 
-# This prevents method chaining if the function takes a multiline block.
-# They should be used carefully/spairingly to maintain readability, but in
-# general they are ok.
-MultilineBlockChain: { Enabled: false }
+#################### Naming ##############################
 
-TrailingCommaInArrayLiteral: { EnforcedStyleForMultiline: comma }
+# This defaults to 'e', we like names a little more descriptive than that.
+Naming/RescuedExceptionsVariableName: { PreferredName: err }
+
+#################### Style ###############################
+
+Style/Copyright: { Enabled: false } # we don't do copyright comments
+Style/Documentation: { Enabled: false } # don't enforce documentation (classes)
+Style/DocumentationMethod: { Enabled: false } # don't enforce documentation
+Style/InlineComment: { Enabled: false } # I like trailing comments.
+Style/MethodCallWithArgsParentheses: { Enabled: false } # I don't like parens
+Style/MethodCalledOnDoEndBlock: { Enabled: false } # chaining is ok
+Style/MissingElse: { Enabled: false } # else's not required
+Style/Send: { Enabled: false } # send is ok
+Style/StringHashKeys: { Enabled: false } # when we use strings, we mean to
+
+# We prefer `rescue => e` to `rescue StandardError => e`.  This is default Ruby
+# behavior and we expect devs to know it.
+Style/RescueStandardError: { EnforcedStyle: implicit }
+
+# They default the arguments to [acc, elem], which, although more expressive,
+# make it much harder to fit expressions on a single line.
+Style/SingleLineBlockParams:
+  Methods:
+    - reduce: [a, e]
+    - inject: [a, e]
+
+# I really like this one, but I cannot until they again support the
+# MaxLineLength option.  Without this, it forces us to write lines longer that
+# 80 characters.  I have an open issue here:
+# https://github.com/rubocop-hq/rubocop/issues/6077
+Style/IfUnlessModifier:
+  # MaxLineLength: 80
+  Enabled: false
+
+# This prevents method chaining if the function takes a multiline block, I agree
+# that those should be used carefully/spairingly to maintain readability, but in
+# general, they are ok.
+Style/MultilineBlockChain: { Enabled: false }
+
+Style/TrailingCommaInArrayLiteral: { EnforcedStyleForMultiline: comma }
+
+# I would love to turn this on, because I like the trailing comma, the problem
+# is that it *always* wants a comma, which results in weird things like this:
+#     },
+#   },
+# }
+Style/TrailingCommaInHashLiteral:
+  Enabled: false
+  EnforcedStyleForMultiline: comma
+
+# I would love to turn this on, because I like the trailing comma, the problem
+# is that it *always* wants a comma, include if it is just a long single
+# argument like this:
+# group_concat(
+#   species.call.description
+#     .op('ORDER BY', species.call.description)
+#     .op('SEPARATOR', '||')
+#     .op('SEPARATOR', '||')*,*
+# ).as(patient_species)
+#
+# I have opened an issue here: https://github.com/bbatsov/rubocop/issues/3392.
+# We can enable this cop if/when it is resolved.
+Style/TrailingCommaInArguments:
+  EnforcedStyleForMultiline: comma
+  Enabled: false
+
+# The default here, nested, takes up WAY to much left indent space.
+Style/ClassAndModuleChildren: { EnforcedStyle: compact }
 
 # Use [] for array % literals that create arrays, () for ones that create single
 # items, and {} for regex
-PercentLiteralDelimiters:
+Style/PercentLiteralDelimiters:
   PreferredDelimiters:
     '%':  ()
     '%i': '[]'
@@ -49,17 +229,25 @@ PercentLiteralDelimiters:
     '%W': '[]'
     '%x': ()
 
-FirstParameterIndentation: { EnforcedStyle: consistent }
-
-MultilineOperationIndentation: { EnforcedStyle: indented }
-
 # `MinBodyLength` defines the number of lines of the a body of an if / unless
 # needs to have to trigger this cop
-GuardClause: { MinBodyLength: 3 }
-
-MultilineMethodCallIndentation: { EnforcedStyle: indented }
-
-IndentArray: { EnforcedStyle: consistent }
+Style/GuardClause: { MinBodyLength: 3 }
 
 # Sometimes nesting if's can greatly improve readability
-IfInsideElse: { Enabled: false }
+Style/IfInsideElse: { Enabled: false }
+
+# I prefer methods with a few parenthesis as possible.  This is a departure from
+# the community style guide.
+Style/NestedParenthesizedCalls: { Enabled: false }
+
+# Based on the arguments from here:
+# https://www.practicingruby.com/articles/ruby-and-the-singleton-pattern-dont-get-along,
+# I now prefer using `extend self` over `module_function` (mostly because of the
+# ability to define private methods).  This is a departure from the community
+# style guide here: https://github.com/bbatsov/ruby-style-guide#module-function,
+# but the guide dosen't give any justification for its reasoning, so I'm
+# comfortable defying it.
+Style/ModuleFunction: { Enabled: false }
+
+# Prefer `%{foo}` over `%<foo>s`
+Style/FormatStringToken: { EnforcedStyle: template }
