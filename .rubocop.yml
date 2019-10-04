@@ -9,7 +9,7 @@ AllCops:
   DisplayStyleGuide: true
   ExtraDetails: true
   EnabledByDefault: true # Turn on all the cops!!
-  TargetRubyVersion: 2.6
+  TargetRubyVersion: 2.3
 
 # Cops
 # ---------------------------------------------
@@ -143,6 +143,11 @@ Metrics/PerceivedComplexity: { Max: 10 }
 
 # Increase max function size
 Metrics/AbcSize: { Max: 50 }
+
+################## Migration #############################
+
+# Agreed, should be off
+Migration/DepartmentName: { Enabled: false }
 
 #################### Naming ##############################
 
