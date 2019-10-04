@@ -17,4 +17,6 @@ else
 end
 
 ActiveSupport::TestCase.extend(Minitest::Spec::DSL)
+ActiveSupport::TestCase.test_order = :random
+
 ActiveRecord::Base.establish_connection(adapter: 'sqlite3', database: ':memory:')
