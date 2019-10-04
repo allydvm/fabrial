@@ -31,6 +31,8 @@ module Fabrial::Fabricate
     end
   end
 
+  private
+
   def contains_return?(objects)
     return false unless objects.is_a? Hash
 
