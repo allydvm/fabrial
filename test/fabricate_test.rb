@@ -2,6 +2,63 @@
 
 require 'test_helper'
 
+ActiveRecord::Base.establish_connection(adapter: 'sqlite3', database: ':memory:')
+ActiveRecord::Migration.verbose = false
+
+ActiveRecord::Schema.define do
+  create_table(:sources) do |t|
+    t.string :name
+    t.timestamps null: false
+  end
+
+  create_table(:enterprises) do |t|
+    t.timestamps null: false
+  end
+
+  create_table(:enterprise_memberships) do |t|
+    t.timestamps null: false
+  end
+
+  create_table(:practices) do |t|
+    t.string :name
+    t.string :email
+    t.string 
+    t.timestamps null: false
+  end
+
+  create_table(:clients) do |t|
+    t.timestamps null: false
+  end
+
+  create_table(:patients) do |t|
+    t.timestamps null: false
+  end
+
+  create_table(:owners) do |t|
+    t.timestamps null: false
+  end
+
+  create_table(:requests) do |t|
+    t.timestamps null: false
+  end
+
+  create_table(:appointments) do |t|
+    t.timestamps null: false
+  end
+
+  create_table(:requests) do |t|
+    t.timestamps null: false
+  end
+
+  create_table(:requests) do |t|
+    t.timestamps null: false
+  end
+
+  create_table(:schedules) do |t|
+    t.timestamps null: false
+  end
+end
+
 class FabricateTest < ActiveSupport::TestCase
   describe 'return values' do
     test 'return top object (Practice) from single tree' do

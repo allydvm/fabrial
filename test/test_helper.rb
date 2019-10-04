@@ -17,4 +17,3 @@ else
 end
 
 ActiveSupport::TestCase.extend(Minitest::Spec::DSL)
-ActiveRecord::Base.establish_connection(adapter: 'sqlite3', database: ':memory:')
