@@ -12,49 +12,83 @@ ActiveRecord::Schema.define do
   end
 
   create_table(:enterprises) do |t|
+    t.string :name
     t.timestamps null: false
   end
 
   create_table(:enterprise_memberships) do |t|
+    t.integer :enterprise_id
+    t.integer :practice_id
     t.timestamps null: false
   end
 
   create_table(:practices) do |t|
     t.string :name
     t.string :email
-    t.string 
+    t.string :address
+    t.string :city
+    t.string :state
+    t.string :postal_code
+    t.timestamps null: false
+  end
+
+  create_table(:employees) do |t|
+    t.integer :source_id
+    t.integer :appointment_id
+    t.integer :practice_id
+    t.integer :client_id
+    t.integer :patient_id
+    t.integer :employee_id
+    t.string :first_name
+    t.string :last_name
     t.timestamps null: false
   end
 
   create_table(:clients) do |t|
+    t.integer :source_id
+    t.integer :client_id
+    t.integer :practice_id
+    t.string :first_name
+    t.string :last_name
     t.timestamps null: false
   end
 
   create_table(:patients) do |t|
+    t.integer :source_id
+    t.integer :patient_id
+    t.integer :practice_id
     t.timestamps null: false
   end
 
   create_table(:owners) do |t|
+    t.integer :source_id
+    t.integer :owner_id
+    t.integer :practice_id
+    t.integer :client_id
+    t.integer :patient_id
     t.timestamps null: false
   end
 
   create_table(:requests) do |t|
+    t.integer :practice_id
+    t.integer :source_id
+    t.integer :client_id
+    t.integer :patient_id
     t.timestamps null: false
   end
 
   create_table(:appointments) do |t|
-    t.timestamps null: false
-  end
-
-  create_table(:requests) do |t|
-    t.timestamps null: false
-  end
-
-  create_table(:requests) do |t|
+    t.integer :source_id
+    t.integer :appointment_id
+    t.integer :practice_id
+    t.integer :client_id
+    t.integer :patient_id
+    t.integer :employee_id
     t.timestamps null: false
   end
 
   create_table(:schedules) do |t|
+    t.integer :practice_id
     t.timestamps null: false
   end
 end
