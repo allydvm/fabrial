@@ -17,7 +17,7 @@ Gem::Specification.new do |spec|
     blueprints.
   DESCRIPTION
 
-  spec.homepage      = 'https://github.com/CyborgMaster/fabrial'
+  spec.homepage      = 'https://github.com/allydvm/fabrial'
   spec.license       = 'MIT'
 
   # Prevent pushing this gem to RubyGems.org. To allow pushes either set the
