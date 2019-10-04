@@ -17,3 +17,4 @@ else
 end
 
 ActiveSupport::TestCase.extend(Minitest::Spec::DSL)
+ActiveSupport::TestCase.test_order = :random
