@@ -1,5 +1,8 @@
+<<<<<<< Updated upstream
 # frozen_string_literal: true
 
+=======
+>>>>>>> Stashed changes
 require 'bundler/gem_tasks'
 require 'rake/testtask'
 
