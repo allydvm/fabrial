@@ -13,7 +13,6 @@ ActiveRecord::Migration.verbose = false
 ActiveRecord::Schema.define do
   create_table(:sources) do |t|
     t.string :name
-    t.string :client_class
     t.timestamps null: false
   end
 
@@ -61,6 +60,13 @@ ActiveRecord::Schema.define do
     t.string :first_name
     t.string :last_name
     t.timestamps null: false
+  end
+
+  create_table :client_classes, primary_key: 'client_class_id' do |t|
+    t.integer :source_id
+    t.integer :practice_id
+    t.timestamps null: false
+    # t.string :description
   end
 
   create_table :patients, primary_key: 'patient_id' do |t|
@@ -207,6 +213,11 @@ class Client < ActiveRecord::Base
   has_many :communication_records
 end
 
+class ClientClass < ActiveRecord::Base
+  belongs_to :practice
+  has_many :clients
+end
+
 class Patient < ActiveRecord::Base
   has_many :reminders
   belongs_to :source
@@ -285,6 +296,8 @@ class Alert < ActiveRecord::Base
 end
 
 class FabricateTest < ActiveSupport::TestCase
+  after { Fabrial.reset }
+
   describe 'return values' do
     test 'return top object (Practice) from single tree' do
       object = Fabrial.fabricate practice: { id: 5, client: {} }
@@ -364,10 +377,13 @@ class FabricateTest < ActiveSupport::TestCase
 
   describe 'practice assignment' do
     # TO REMOVE:
-    # test 'Default practice is created' do
-    #   Fabrial.fabricate client: {}
-    #   assert_equal MakeObjectTree::DEFAULT_PRACTICE_ID, Practice.first.id
-    # end
+    test 'Default practice is created' do
+      Fabrial.before_fabricate do |objects|
+        { practice: { id: 234 }.merge(objects) }
+      end
+      Fabrial.fabricate client: {}
+      assert_equal 234, Practice.first.id
+    end
     # test 'Default practice is used, if practice is not parent' do
     #   Fabrial.fabricate client: {}
     #   assert_equal MakeObjectTree::DEFAULT_PRACTICE_ID, Client.first.practice_id
@@ -387,14 +403,14 @@ class FabricateTest < ActiveSupport::TestCase
       Fabrial.fabricate practice: { id: 3, client: { practice: practice } }
       assert_equal 2, Client.first.practice_id
     end
-    test 'specifying source attaches default practice' do
-      Fabrial.fabricate source: { id: 2, client: {} }
-      assert_equal 1, Source.count
-      assert_equal 1, Practice.count # default created practice
-      assert_equal 2, Practice.first.source_id
-    end
 
     # TO REMOVE:
+    # test 'specifying source attaches default practice' do
+    #   Fabrial.fabricate source: { id: 2, client: {} }
+    #   assert_equal 1, Source.count
+    #   assert_equal 1, Practice.count # default created practice
+    #   assert_equal 2, Practice.first.source_id
+    # end
     # describe "doesn't create defaults if no_default: true" do
     #   test 'default source and practice created above enterprise' do
     #     Fabrial.fabricate enterprise: { source: { practice: {} } }
@@ -485,8 +501,7 @@ class FabricateTest < ActiveSupport::TestCase
       assert_equal Patient.first.patient_id, owner.patient_id
     end
     test 'membership created for practice under enterprise' do
-      Fabrial.fabricate NO_DEFAULTS: true,
-        source: { enterprise: { practice: {} } }
+      Fabrial.fabricate source: { enterprise: { practice: {} } }
       member = EnterpriseMembership.first
       assert_equal Enterprise.first.id, member.enterprise_id
       assert_equal Practice.first.id, member.practice_id

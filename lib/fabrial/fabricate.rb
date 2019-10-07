@@ -11,20 +11,9 @@
 module Fabrial::Fabricate
   # Make expects a nested hash of type => data or [data]
   def fabricate(objects)
-    # TODO: Raise error if mixing array and hash return styles
+    objects = Fabrial.run_before_fabricate objects
+    add_default_return objects
 
-    # If a return object(s) wasn't specified, default to returning the first
-    # object.
-    unless contains_return? objects
-      ret = objects.values.find do |v|
-        v.is_a?(Hash) || (v.is_a?(Array) && !v.empty?)
-      end
-      if ret
-        ret = ret.first if ret.is_a? Array
-        ret[:RETURN] = true
-      end
-    end
-    objects = add_defaults objects
     ancestors = {}
     returns = make_types objects, ancestors
 
@@ -33,6 +22,21 @@ module Fabrial::Fabricate
       returns.to_h
     else
       returns.length <= 1 ? returns.first : returns
+    end
+  end
+
+  # If a return object(s) wasn't specified, default to returning the first
+  # object.
+  # TODO: Raise error if mixing array and hash return styles
+  def add_default_return(objects)
+    return if contains_return? objects
+
+    ret = objects.values.find do |v|
+      v.is_a?(Hash) || (v.is_a?(Array) && !v.empty?)
+    end
+    if ret
+      ret = ret.first if ret.is_a? Array
+      ret[:RETURN] = true
     end
   end
 
@@ -48,25 +52,25 @@ module Fabrial::Fabricate
   end
 
   # Setup default source and practice if not provided
-  def add_defaults(objects)
-    return objects if objects.delete :NO_DEFAULTS
+  # def add_defaults(objects)
+  #   return objects if objects.delete :NO_DEFAULTS
 
-    unless %i[source sources].any? { |k| objects.key? k }
-      objects = { source: default_source.merge(objects) }
-    end
+  #   unless %i[source sources].any? { |k| objects.key? k }
+  #     objects = { source: default_source.merge(objects) }
+  #   end
 
-    # We can only make a default practice if we are dealing with a single sync
-    # client.
-    source = objects[:source]
-    if source.is_a?(Hash)
-      unless %i[practice practices].any? { |p| source.key? p }
-        children = extract_child_records Practice, source
-        source[:practice] = default_practice.merge children
-      end
-    end
+  #   # We can only make a default practice if we are dealing with a single sync
+  #   # client.
+  #   source = objects[:source]
+  #   if source.is_a?(Hash)
+  #     unless %i[practice practices].any? { |p| source.key? p }
+  #       children = extract_child_records Practice, source
+  #       source[:practice] = default_practice.merge children
+  #     end
+  #   end
 
-    objects
-  end
+  #   objects
+  # end
 
   # return_skip_levels allows us to skip created default practices and
   # sources when choosing an object to return.
@@ -74,6 +78,9 @@ module Fabrial::Fabricate
     returns = []
     objects.each do |type, data|
       klass = get_class(type)
+      if klass.nil?
+        raise Fabrial::UnknownClassError, "Class #{type} does not exist"
+      end
       returns.concat make_type klass, data, ancestors
     end
     returns
@@ -211,18 +218,18 @@ module Fabrial::Fabricate
       type.to_s.classify.pluralize.safe_constantize
   end
 
-  DEFAULT_SOURCE_ID = -123
-  public_constant :DEFAULT_SOURCE_ID
-  def default_source
-    c = Source.find_by id: DEFAULT_SOURCE_ID
-    c ? { object: c } : { id: DEFAULT_SOURCE_ID }
-  end
+  # DEFAULT_SOURCE_ID = -123
+  # public_constant :DEFAULT_SOURCE_ID
+  # def default_source
+  #   c = Source.find_by id: DEFAULT_SOURCE_ID
+  #   c ? { object: c } : { id: DEFAULT_SOURCE_ID }
+  # end
 
-  DEFAULT_PRACTICE_ID = -456
-  public_constant :DEFAULT_PRACTICE_ID
-  def default_practice
-    p = Practice.find_by id: DEFAULT_PRACTICE_ID
-    p ? { object: p } : { id: DEFAULT_PRACTICE_ID }
-  end
+  # DEFAULT_PRACTICE_ID = -456
+  # public_constant :DEFAULT_PRACTICE_ID
+  # def default_practice
+  #   p = Practice.find_by id: DEFAULT_PRACTICE_ID
+  #   p ? { object: p } : { id: DEFAULT_PRACTICE_ID }
+  # end
 end
 # rubocop:enable Metrics/ModuleLength
