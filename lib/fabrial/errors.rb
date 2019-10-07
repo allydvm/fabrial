@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
-module Fabrial # rubocop:disable ClassAndModuleChildren - will have more in future
+# rubocop:disable Style/ClassAndModuleChildren - will have more in future
+module Fabrial
   class Error < RuntimeError; end
 end
+# rubocop:enable Style/ClassAndModuleChildren
