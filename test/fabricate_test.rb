@@ -98,9 +98,15 @@ ActiveRecord::Schema.define do
     t.timestamps null: false
   end
 
-  create_table(:filters) do |t|
-    t.string :type
+  create_table(:communication_settings) do |t|
     t.timestamps null: false
+  end
+
+  create_table(:filters) do |t|
+    t.integer :communication_setting_id
+    t.timestamps null: false
+    t.string :type
+    t.text :settings
   end
 
   create_table(:reminders) do |t|
@@ -203,7 +209,16 @@ class Schedule::Category < ActiveRecord::Base
   # has_and_belongs_to_many :appointment_types
 end
 
+class CommunicationSetting < ActiveRecord::Base
+  # has_one :trigger
+  has_many :filters
+  # has_many :media
+  # has_many :communication_records
+  # belongs_to :owner, polymorphic: true
+end
+
 class Filter < ActiveRecord::Base
+  belongs_to :communication_setting
 end
 
 class FabricateTest < ActiveSupport::TestCase
