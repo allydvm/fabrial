@@ -121,6 +121,7 @@ ActiveRecord::Schema.define do
     t.integer :client_id
     t.integer :patient_id
     t.integer :regarding_id
+    t.string :regarding_type
     t.timestamps null: false
   end
 
@@ -267,8 +268,8 @@ end
 class CommunicationRecord < ActiveRecord::Base
   belongs_to :source
   belongs_to :practice
-  belongs_to :client
-  belongs_to :patient
+  belongs_to :communication_setting
+  belongs_to :regarding, polymorphic: true
 end
 
 class Filter < ActiveRecord::Base
