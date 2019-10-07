@@ -160,7 +160,7 @@ module Fabrial::Fabricate
     }. each do |connected, connector|
       next unless (connected.delete klass) && (ancestors.key? connected[0])
 
-      unless children.key? connector.class_name.underscore.to_sym
+      unless children.key? connector.name.demodulize.underscore.to_sym
         children.reverse_merge! connector => {}
       end
     end
@@ -196,7 +196,7 @@ module Fabrial::Fabricate
   def polymorphic(klass)
     klass.reflect_on_all_associations
       .select(&:polymorphic?)
-      .map { |a| a.class_name.underscore.to_sym }[0]
+      .map { |a| a.name.demodulize.underscore.to_sym }[0]
   end
 
   def get_class(type)

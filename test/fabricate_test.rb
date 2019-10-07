@@ -93,9 +93,14 @@ ActiveRecord::Schema.define do
     t.timestamps null: false
   end
 
+  create_table(:schedule_categories) do |t|
+    t.integer :schedule_id
+    t.timestamps null: false
+  end
+
   create_table(:filters) do |t|
     t.string :type
-    t.timestamps
+    t.timestamps null: false
   end
 
   create_table(:reminders) do |t|
@@ -190,6 +195,15 @@ class Reminder < ActiveRecord::Base
   belongs_to :source
   belongs_to :practice
   belongs_to :patient
+end
+
+class Schedule::Category < ActiveRecord::Base
+  belongs_to :schedule, class_name: '::Schedule'
+  # has_many :entries, autosave: true
+  # has_and_belongs_to_many :appointment_types
+end
+
+class Filter < ActiveRecord::Base
 end
 
 class FabricateTest < ActiveSupport::TestCase
