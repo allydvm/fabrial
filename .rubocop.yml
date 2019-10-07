@@ -12,7 +12,7 @@ AllCops:
   TargetRubyVersion: 2.3
   Exclude:
     - vendor/*
-    - gemfiles/*
+    - gemfiles/**/*
 
 # Cops
 # ---------------------------------------------
