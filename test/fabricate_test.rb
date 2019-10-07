@@ -44,9 +44,8 @@ ActiveRecord::Schema.define do
     t.timestamps null: false
   end
 
-  create_table(:clients) do |t|
+  create_table :clients, primary_key: 'client_id' do |t|
     t.integer :source_id
-    t.integer :client_id
     t.integer :practice_id
     t.string :first_name
     t.string :last_name
@@ -123,6 +122,13 @@ ActiveRecord::Schema.define do
     t.integer :reminder_id
     t.integer :practice_id
     t.integer :patient_id
+    t.timestamps null: false
+  end
+
+  create_table(:alerts) do |t|
+    t.string :type
+    t.integer :alertable_id
+    t.string :alertable_type
   end
 end
 
@@ -234,6 +240,10 @@ end
 
 class Filter < ActiveRecord::Base
   belongs_to :communication_setting
+end
+
+class Alert < ActiveRecord::Base
+  belongs_to :alertable, polymorphic: true
 end
 
 class FabricateTest < ActiveSupport::TestCase

@@ -196,7 +196,7 @@ module Fabrial::Fabricate
   def polymorphic(klass)
     klass.reflect_on_all_associations
       .select(&:polymorphic?)
-      .map { |a| a.name.demodulize.underscore.to_sym }[0]
+      .map { |a| a.class_name.underscore.to_sym }[0]
   end
 
   def get_class(type)
