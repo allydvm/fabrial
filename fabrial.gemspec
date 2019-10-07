@@ -47,6 +47,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'minitest', '~> 5.12', '>= 5.12.2'
   spec.add_development_dependency 'minitest-focus', '~> 1.1', '>= 1.1.2'
   spec.add_development_dependency 'minitest-reporters', '~> 1.3', '>= 1.3.8'
+  spec.add_development_dependency 'mocha'
   spec.add_development_dependency 'pry'
   spec.add_development_dependency 'pry-byebug'
   spec.add_development_dependency 'rake', '~> 13.0'

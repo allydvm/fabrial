@@ -34,6 +34,28 @@ module Fabrial::Fabricate
     end
   end
 
+  def extract_child_records(klass, data)
+    children = data.select do |type, v|
+      # Must have nested data
+      [Array, Hash].any? { |c| v.is_a? c } &&
+        # Must be a class that we can instantiate
+      get_class(type) &&
+
+      # Even if it has the same name as a Model in the system, if it is also
+      # the name of a column in the table, assume the data is for a serialzed
+      # field and not a nested relation.  Ex: Requests have a serialized field
+      # called content and there is also a Content model in the system.
+      (
+        # If they are using a class as the key, then always choose the class
+        # over the field.
+        type.is_a?(Class) ||
+
+        !column_names(klass).include?(type.to_s)
+    )
+    end
+    data.extract!(*children.keys)
+  end
+
   private
 
   def contains_return?(objects)
@@ -121,7 +143,12 @@ module Fabrial::Fabricate
     type_col = klass.inheritance_column.try :to_sym
     type = data.delete(type_col).try :safe_constantize
     type ||= klass
-    create type, data.reverse_merge(associations)
+    begin
+      create type, data.reverse_merge(associations)
+    rescue
+      raise Fabrial::CreationError,
+        "Error creating #{type.name} with data: #{data}"
+    end
   end
 
   def collect_associations(klass, ancestors)
@@ -130,28 +157,6 @@ module Fabrial::Fabricate
       associations[p] = ancestors.values.last
     end
     associations
-  end
-
-  def extract_child_records(klass, data)
-    children = data.select do |type, v|
-      # Must have nested data
-      [Array, Hash].any? { |c| v.is_a? c } &&
-        # Must be a class that we can instantiate
-        get_class(type) &&
-
-        # Even if it has the same name as a Model in the system, if it is also
-        # the name of a column in the table, assume the data is for a serialzed
-        # field and not a nested relation.  Ex: Requests have a serialized field
-        # called content and there is also a Content model in the system.
-        (
-          # If they are using a class as the key, then always choose the class
-          # over the field.
-          type.is_a?(Class) ||
-
-            !column_names(klass).include?(type.to_s)
-        )
-    end
-    data.extract!(*children.keys)
   end
 
   def column_names(klass)

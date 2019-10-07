@@ -570,4 +570,12 @@ class FabricateTest < ActiveSupport::TestCase
     }
     refute_nil Request.first.content[:comment]
   end
+
+  test 'throws error if errored while creating object' do
+    Fabrial.stubs(:create).raises 'die'
+    error = assert_raises Fabrial::CreationError do
+      Fabrial.fabricate client: { first_name: 'Jason' }
+    end
+    assert_equal 'die', error.cause.message
+  end
 end
