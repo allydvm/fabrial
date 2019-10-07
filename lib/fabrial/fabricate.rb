@@ -1,7 +1,9 @@
 # frozen_string_literal: true
 
 # TODO: properly hook up parent associations for pre-created objects passed in
-# TODO: Split out the default practice and sync client into its own file
+
+# TODO: Add hook for default practice and source
+# TODO: Add hook for transforming objects before creation
 
 # TODO: fix this rubocop instead of disabling
 # rubocop:disable Metrics/ModuleLength - this will have some things factored out

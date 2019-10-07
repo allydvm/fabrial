@@ -4,8 +4,12 @@ require 'test_helper'
 
 ActiveRecord::Base.establish_connection(adapter: 'sqlite3', database: ':memory:')
 ActiveRecord::Migration.verbose = false
+
+# Uncomment this to log all SQL queries executed
 # ActiveRecord::Base.logger = Logger.new(STDOUT)
 
+# TODO: Consolidate these models to few that support all the test cases.  Or
+# maybe define some of the wierder test cases right in the test?
 ActiveRecord::Schema.define do
   create_table(:sources) do |t|
     t.string :name
