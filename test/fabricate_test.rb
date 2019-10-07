@@ -92,9 +92,14 @@ ActiveRecord::Schema.define do
     t.timestamps null: false
   end
 
+  create_table(:schedule_categories) do |t|
+    t.integer :schedule_id
+    t.timestamps null: false
+  end
+
   create_table(:filters) do |t|
     t.string :type
-    t.timestamps
+    t.timestamps null: false
   end
 end
 
@@ -170,6 +175,12 @@ end
 
 class Schedule < ActiveRecord::Base
   belongs_to :practice
+end
+
+class Schedule::Category < ActiveRecord::Base
+  belongs_to :schedule, class_name: '::Schedule'
+  # has_many :entries, autosave: true
+  # has_and_belongs_to_many :appointment_types
 end
 
 class Filter
