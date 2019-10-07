@@ -7,7 +7,7 @@ require 'fabrial/version'
 Gem::Specification.new do |spec|
   spec.name          = 'fabrial'
   spec.version       = Fabrial::VERSION
-  spec.authors       = ['Jeremy Mickelson', 'Tad Thorley']
+  spec.authors       = ['Jeremy Mickelson', 'Tad Thorley', 'Ralph Mickelson']
   spec.email         = ['jeremy.mickelson@gmail.com']
 
   spec.summary       = 'Simply create test data inline with your tests'
