@@ -74,6 +74,7 @@ ActiveRecord::Schema.define do
     t.integer :source_id
     t.integer :client_id
     t.integer :patient_id
+    t.text :content
     t.timestamps null: false
   end
 
@@ -96,6 +97,13 @@ ActiveRecord::Schema.define do
     t.string :type
     t.timestamps
   end
+
+  create_table(:reminders) do |t|
+    t.integer :source_id
+    t.integer :reminder_id
+    t.integer :practice_id
+    t.integer :patient_id
+  end
 end
 
 class Source < ActiveRecord::Base
@@ -105,6 +113,7 @@ class Source < ActiveRecord::Base
   has_many :requests
   has_many :appointments
   has_many :schedules
+  has_many :reminders
 end
 
 class Enterprise < ActiveRecord::Base
@@ -126,6 +135,7 @@ class Practice < ActiveRecord::Base
   has_many :requests
   has_many :appointments
   has_many :schedules
+  has_many :reminders
 end
 
 class Employee < ActiveRecord::Base
@@ -142,6 +152,7 @@ class Client < ActiveRecord::Base
 end
 
 class Patient < ActiveRecord::Base
+  has_many :reminders
   belongs_to :source
   belongs_to :practice
 end
@@ -172,7 +183,13 @@ class Schedule < ActiveRecord::Base
   belongs_to :practice
 end
 
-class Filter
+class Filter < ActiveRecord::Base
+end
+
+class Reminder < ActiveRecord::Base
+  belongs_to :source
+  belongs_to :practice
+  belongs_to :patient
 end
 
 class FabricateTest < ActiveSupport::TestCase
