@@ -4,12 +4,18 @@ require 'test_helper'
 
 ActiveRecord::Base.establish_connection(adapter: 'sqlite3', database: ':memory:')
 ActiveRecord::Migration.verbose = false
-ActiveRecord::Base.logger = Logger.new(STDOUT)
+# ActiveRecord::Base.logger = Logger.new(STDOUT)
 
 ActiveRecord::Schema.define do
   create_table(:sources) do |t|
     t.string :name
+    t.string :client_class
     t.timestamps null: false
+  end
+
+  create_table(:users) do |t|
+    t.integer :source_id
+    t.string :name
   end
 
   create_table(:enterprises) do |t|
@@ -24,6 +30,7 @@ ActiveRecord::Schema.define do
   end
 
   create_table(:practices) do |t|
+    t.integer :source_id
     t.string :name
     t.string :email
     t.string :address
@@ -55,6 +62,7 @@ ActiveRecord::Schema.define do
   create_table :patients, primary_key: 'patient_id' do |t|
     t.integer :source_id
     t.integer :practice_id
+    t.string :name
     t.timestamps null: false
   end
 
@@ -82,6 +90,7 @@ ActiveRecord::Schema.define do
     t.integer :client_id
     t.integer :patient_id
     t.integer :employee_id
+    t.string :notes
     t.timestamps null: false
   end
 
@@ -103,6 +112,15 @@ ActiveRecord::Schema.define do
   end
 
   create_table(:communication_settings) do |t|
+    t.timestamps null: false
+  end
+
+  create_table(:communication_records) do |t|
+    t.integer :source_id
+    t.integer :practice_id
+    t.integer :client_id
+    t.integer :patient_id
+    t.integer :regarding_id
     t.timestamps null: false
   end
 
@@ -130,6 +148,7 @@ ActiveRecord::Schema.define do
 end
 
 class Source < ActiveRecord::Base
+  has_many :practices
   has_many :employeees
   has_many :clients
   has_many :patients
@@ -137,6 +156,12 @@ class Source < ActiveRecord::Base
   has_many :appointments
   has_many :schedules
   has_many :reminders
+  has_many :users
+  has_many :communication_records
+end
+
+class User < ActiveRecord::Base
+  belongs_to :source
 end
 
 class Enterprise < ActiveRecord::Base
@@ -150,6 +175,7 @@ class EnterpriseMembership < ActiveRecord::Base
 end
 
 class Practice < ActiveRecord::Base
+  belongs_to :source
   has_many :enterprise_memberships
   has_many :enterprises, through: :enterprise_memberships
   has_many :clients
@@ -159,6 +185,7 @@ class Practice < ActiveRecord::Base
   has_many :appointments
   has_many :schedules
   has_many :reminders
+  has_many :communication_records
 end
 
 class Employee < ActiveRecord::Base
@@ -172,12 +199,14 @@ end
 class Client < ActiveRecord::Base
   belongs_to :source
   belongs_to :practice
+  has_many :communication_records
 end
 
 class Patient < ActiveRecord::Base
   has_many :reminders
   belongs_to :source
   belongs_to :practice
+  has_many :communication_records
 end
 
 class Owner < ActiveRecord::Base
@@ -233,6 +262,13 @@ class CommunicationSetting < ActiveRecord::Base
   # has_many :media
   # has_many :communication_records
   # belongs_to :owner, polymorphic: true
+end
+
+class CommunicationRecord < ActiveRecord::Base
+  belongs_to :source
+  belongs_to :practice
+  belongs_to :client
+  belongs_to :patient
 end
 
 class Filter < ActiveRecord::Base
@@ -376,8 +412,7 @@ class FabricateTest < ActiveSupport::TestCase
     end
     test 'children are in parent`s practice' do
       Fabrial.fabricate patient: { reminder: {} }
-      assert_equal MakeObjectTree::DEFAULT_PRACTICE_ID,
-        Reminder.first.practice_id
+      # assert_equal MakeObjectTree::DEFAULT_PRACTICE_ID, Reminder.first.practice_id
       Fabrial.fabricate practice: { id: 4, patient: { reminder: {} } }
       assert_equal 4, Reminder.last.practice_id
     end
