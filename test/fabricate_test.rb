@@ -32,9 +32,8 @@ ActiveRecord::Schema.define do
     t.timestamps null: false
   end
 
-  create_table(:employees) do |t|
+  create_table :employees, primary_key: 'appointment_id' do |t|
     t.integer :source_id
-    t.integer :appointment_id
     t.integer :practice_id
     t.integer :client_id
     t.integer :patient_id
@@ -52,23 +51,21 @@ ActiveRecord::Schema.define do
     t.timestamps null: false
   end
 
-  create_table(:patients) do |t|
+  create_table :patients, primary_key: 'patient_id' do |t|
     t.integer :source_id
-    t.integer :patient_id
     t.integer :practice_id
     t.timestamps null: false
   end
 
-  create_table(:owners) do |t|
+  create_table :owners, primary_key: 'owner_id' do |t|
     t.integer :source_id
-    t.integer :owner_id
     t.integer :practice_id
     t.integer :client_id
     t.integer :patient_id
     t.timestamps null: false
   end
 
-  create_table(:requests) do |t|
+  create_table :requests do |t|
     t.integer :practice_id
     t.integer :source_id
     t.integer :client_id
@@ -77,9 +74,8 @@ ActiveRecord::Schema.define do
     t.timestamps null: false
   end
 
-  create_table(:appointments) do |t|
+  create_table :appointments, primary_key: 'appointment_id' do |t|
     t.integer :source_id
-    t.integer :appointment_id
     t.integer :practice_id
     t.integer :client_id
     t.integer :patient_id
@@ -117,9 +113,8 @@ ActiveRecord::Schema.define do
     t.text :settings
   end
 
-  create_table(:reminders) do |t|
+  create_table :reminders, primary_key: 'reminder_id' do |t|
     t.integer :source_id
-    t.integer :reminder_id
     t.integer :practice_id
     t.integer :patient_id
     t.timestamps null: false
