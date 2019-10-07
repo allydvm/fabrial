@@ -91,6 +91,11 @@ ActiveRecord::Schema.define do
     t.integer :practice_id
     t.timestamps null: false
   end
+
+  create_table(:filters) do |t|
+    t.string :type
+    t.timestamps
+  end
 end
 
 class Source < ActiveRecord::Base
@@ -165,6 +170,9 @@ end
 
 class Schedule < ActiveRecord::Base
   belongs_to :practice
+end
+
+class Filter
 end
 
 class FabricateTest < ActiveSupport::TestCase
