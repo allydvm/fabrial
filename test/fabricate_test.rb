@@ -93,6 +93,80 @@ ActiveRecord::Schema.define do
   end
 end
 
+class Source < ActiveRecord::Base
+  has_many :employeees
+  has_many :clients
+  has_many :patients
+  has_many :requests
+  has_many :appointments
+  has_many :schedules
+end
+
+class Enterprise < ActiveRecord::Base
+  has_many :enterprise_memberships
+  has_many :practices, through: :enterprise_memberships
+end
+
+class EnterpriseMembership < ActiveRecord:Base
+  belongs_to :enterprise
+  belongs_to :practice
+end
+
+class Practice < ActiveRecord::Base
+  has_many :enterprise_memberships
+  has_many :enterprises, through: :enterprise_memberships
+  has_many :clients
+  has_many :patients
+  has_many :owners
+  has_many :requests
+  has_many :appointments
+  has_many :schedules
+end
+
+class Employee < ActiveRecord::Base
+  belongs_to :source
+  belongs_to :appointment
+  belongs_to :practice
+  belongs_to :client
+  belongs_to :patient
+end
+
+class Client < ActiveRecord::Base
+  belongs_to :source
+  belongs_to :practice
+end
+
+class Patient < ActiveRecord::Base
+  belongs_to :source
+  belongs_to :practice
+end
+
+class Owner < ActiveRecord::Base
+  belongs_to :source
+  belongs_to :practice
+  belongs_to :client
+  belongs_to :patient
+end
+
+class Request < ActiveRecord::Base
+  belongs_to :source
+  belongs_to :practice
+  belongs_to :client
+  belongs_to :patient
+end
+
+class Appointment < ActiveRecord::Base
+  belongs_to :source
+  belongs_to :practice
+  belongs_to :client
+  belongs_to :patient
+  belongs_to :employee
+end
+
+class Schedule < ActiveRecord::Base
+  belongs_to :practice
+end
+
 class FabricateTest < ActiveSupport::TestCase
   describe 'return values' do
     test 'return top object (Practice) from single tree' do
