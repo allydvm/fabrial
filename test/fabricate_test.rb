@@ -4,6 +4,7 @@ require 'test_helper'
 
 ActiveRecord::Base.establish_connection(adapter: 'sqlite3', database: ':memory:')
 ActiveRecord::Migration.verbose = false
+ActiveRecord::Base.logger = Logger.new(STDOUT)
 
 ActiveRecord::Schema.define do
   create_table(:sources) do |t|
