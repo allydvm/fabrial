@@ -150,7 +150,7 @@ module Fabrial::Fabricate
     klass.column_names
 
     # our project uses
-    klass.column_names_including_stored
+    # klass.column_names_including_stored
   end
 
   def add_implicit_owner(klass, ancestors, children)
