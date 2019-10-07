@@ -23,7 +23,17 @@ module Fabrial
     end
   end
 
+  @before_create = nil
+  def self.before_create(&block)
+    @before_create = block
+  end
+
+  def self.run_before_create(klass, data, ancesstors, children)
+    @before_create&.call klass, data, ancesstors, children
+  end
+
   def self.reset
     @before_fabricate = nil
+    @before_create = nil
   end
 end

@@ -473,39 +473,44 @@ class FabricateTest < ActiveSupport::TestCase
 
   describe 'implicit objects' do
     test 'owner record is created for patient under client' do
-      Fabrial.fabricate client: { patient: {} }
+      Fabrial.before_create do |klass, data, ancestors, children|
+        return unless klass == Patient && ancestors.key?(Client)
+        children.reverse_merge! owner: {} unless children.key? :owner
+      end
+      Fabrial.fabricate practice: { client: { patient: {} } }
       owner = Owner.first
       assert_equal Client.first.client_id, owner.client_id
       assert_equal Patient.first.patient_id, owner.patient_id
     end
-    test 'owner record created for client under patient' do
-      Fabrial.fabricate patient: { client: {} }
-      owner = Owner.first
-      assert_equal Client.first.client_id, owner.client_id
-      assert_equal Patient.first.patient_id, owner.patient_id
-    end
-    test 'owner record used under patient under client' do
-      Fabrial.fabricate client: { patient: { owner: { percentage: 50 } } }
-      owner = Owner.first
-      assert_equal 1, Owner.count
-      assert_equal 50, owner.percentage
-      assert_equal Client.first.client_id, owner.client_id
-      assert_equal Patient.first.patient_id, owner.patient_id
-    end
-    test 'owner record used under client under patient' do
-      Fabrial.fabricate patient: { client: { owner: { percentage: 50 } } }
-      owner = Owner.first
-      assert_equal 1, Owner.count
-      assert_equal 50, owner.percentage
-      assert_equal Client.first.client_id, owner.client_id
-      assert_equal Patient.first.patient_id, owner.patient_id
-    end
-    test 'membership created for practice under enterprise' do
-      Fabrial.fabricate source: { enterprise: { practice: {} } }
-      member = EnterpriseMembership.first
-      assert_equal Enterprise.first.id, member.enterprise_id
-      assert_equal Practice.first.id, member.practice_id
-    end
+    # TO REMOVE:
+    # test 'owner record created for client under patient' do
+    #   Fabrial.fabricate patient: { client: {} }
+    #   owner = Owner.first
+    #   assert_equal Client.first.client_id, owner.client_id
+    #   assert_equal Patient.first.patient_id, owner.patient_id
+    # end
+    # test 'owner record used under patient under client' do
+    #   Fabrial.fabricate client: { patient: { owner: { percentage: 50 } } }
+    #   owner = Owner.first
+    #   assert_equal 1, Owner.count
+    #   assert_equal 50, owner.percentage
+    #   assert_equal Client.first.client_id, owner.client_id
+    #   assert_equal Patient.first.patient_id, owner.patient_id
+    # end
+    # test 'owner record used under client under patient' do
+    #   Fabrial.fabricate patient: { client: { owner: { percentage: 50 } } }
+    #   owner = Owner.first
+    #   assert_equal 1, Owner.count
+    #   assert_equal 50, owner.percentage
+    #   assert_equal Client.first.client_id, owner.client_id
+    #   assert_equal Patient.first.patient_id, owner.patient_id
+    # end
+    # test 'membership created for practice under enterprise' do
+    #   Fabrial.fabricate source: { enterprise: { practice: {} } }
+    #   member = EnterpriseMembership.first
+    #   assert_equal Enterprise.first.id, member.enterprise_id
+    #   assert_equal Practice.first.id, member.practice_id
+    # end
   end
 
   describe 'models inside modules' do

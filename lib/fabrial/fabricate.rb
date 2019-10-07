@@ -51,6 +51,7 @@ module Fabrial::Fabricate
     end
   end
 
+  # TO REMOVE;
   # Setup default source and practice if not provided
   # def add_defaults(objects)
   #   return objects if objects.delete :NO_DEFAULTS
@@ -96,7 +97,7 @@ module Fabrial::Fabricate
     Array.wrap(data_list).each do |data|
       should_return = data.delete :RETURN
       children = extract_child_records klass, data
-      add_implicit_owner klass, ancestors, children
+      run_before_create klass, data, ancestors, children
       object = make_object klass, data, associations
 
       # Make sure new object is added as last item of ancestor hash
@@ -165,18 +166,19 @@ module Fabrial::Fabricate
     # klass.column_names_including_stored
   end
 
-  def add_implicit_owner(klass, ancestors, children)
-    {
-      [Client, Patient] => Owner,
-      [Enterprise, Practice] => EnterpriseMembership,
-    }. each do |connected, connector|
-      next unless (connected.delete klass) && (ancestors.key? connected[0])
+  # TO REMOVE:
+  # def add_implicit_owner(klass, ancestors, children)
+  #   {
+  #     [Client, Patient] => Owner,
+  #     [Enterprise, Practice] => EnterpriseMembership,
+  #   }. each do |connected, connector|
+  #     next unless (connected.delete klass) && (ancestors.key? connected[0])
 
-      unless children.key? connector.name.demodulize.underscore.to_sym
-        children.reverse_merge! connector => {}
-      end
-    end
-  end
+  #     unless children.key? connector.name.demodulize.underscore.to_sym
+  #       children.reverse_merge! connector => {}
+  #     end
+  #   end
+  # end
 
   def collect_parents(klass, ancestors)
     associations = klass.reflect_on_all_associations
@@ -218,13 +220,14 @@ module Fabrial::Fabricate
       type.to_s.classify.pluralize.safe_constantize
   end
 
+  # TO REMOVE:
   # DEFAULT_SOURCE_ID = -123
   # public_constant :DEFAULT_SOURCE_ID
   # def default_source
   #   c = Source.find_by id: DEFAULT_SOURCE_ID
   #   c ? { object: c } : { id: DEFAULT_SOURCE_ID }
   # end
-
+  #
   # DEFAULT_PRACTICE_ID = -456
   # public_constant :DEFAULT_PRACTICE_ID
   # def default_practice
