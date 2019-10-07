@@ -39,19 +39,19 @@ module Fabrial::Fabricate
       # Must have nested data
       [Array, Hash].any? { |c| v.is_a? c } &&
         # Must be a class that we can instantiate
-      get_class(type) &&
+        get_class(type) &&
 
-      # Even if it has the same name as a Model in the system, if it is also
-      # the name of a column in the table, assume the data is for a serialzed
-      # field and not a nested relation.  Ex: Requests have a serialized field
-      # called content and there is also a Content model in the system.
-      (
-        # If they are using a class as the key, then always choose the class
-        # over the field.
-        type.is_a?(Class) ||
+        # Even if it has the same name as a Model in the system, if it is also
+        # the name of a column in the table, assume the data is for a serialzed
+        # field and not a nested relation.  Ex: Requests have a serialized field
+        # called content and there is also a Content model in the system.
+        (
+          # If they are using a class as the key, then always choose the class
+          # over the field.
+          type.is_a?(Class) ||
 
-        !column_names(klass).include?(type.to_s)
-    )
+          !column_names(klass).include?(type.to_s)
+        )
     end
     data.extract!(*children.keys)
   end
