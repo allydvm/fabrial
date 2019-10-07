@@ -10,6 +10,9 @@ AllCops:
   ExtraDetails: true
   EnabledByDefault: true # Turn on all the cops!!
   TargetRubyVersion: 2.3
+  Exclude:
+    - vendor/*
+    - gemfiles/*
 
 # Cops
 # ---------------------------------------------
