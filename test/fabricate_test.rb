@@ -100,6 +100,7 @@ ActiveRecord::Schema.define do
 
   create_table(:filters) do |t|
     t.string :type
+    t.string :settings
     t.timestamps null: false
   end
 
@@ -174,6 +175,8 @@ class Request < ActiveRecord::Base
   belongs_to :practice
   belongs_to :client
   belongs_to :patient
+
+  serialize :content
 end
 
 class Appointment < ActiveRecord::Base
@@ -458,8 +461,6 @@ class FabricateTest < ActiveSupport::TestCase
     refute_nil Filter.first.settings
   end
 
-  # This was giving us trouble because there is a class called Content and a
-  # field on Request called content.
   test 'request with content' do
     Fabrial.fabricate request: {
       type: :appointment,
