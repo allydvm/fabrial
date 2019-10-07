@@ -66,6 +66,7 @@ ActiveRecord::Schema.define do
     t.integer :practice_id
     t.integer :client_id
     t.integer :patient_id
+    t.integer :percentage
     t.timestamps null: false
   end
 
