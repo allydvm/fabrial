@@ -29,6 +29,7 @@ GEM
     byebug (11.0.1)
     coderay (1.1.2)
     concurrent-ruby (1.1.5)
+    database_cleaner (1.7.0)
     i18n (1.7.0)
       concurrent-ruby (~> 1.0)
     jaro_winkler (1.5.3)
@@ -73,6 +74,7 @@ PLATFORMS
 DEPENDENCIES
   appraisal (~> 2.2, >= 2.2.0)
   bundler (~> 1.0)
+  database_cleaner
   fabrial!
   minitest (~> 5.12, >= 5.12.2)
   minitest-focus (~> 1.1, >= 1.1.2)
