@@ -32,9 +32,8 @@ ActiveRecord::Schema.define do
     t.timestamps null: false
   end
 
-  create_table(:employees) do |t|
+  create_table :employees, primary_key: 'appointment_id' do |t|
     t.integer :source_id
-    t.integer :appointment_id
     t.integer :practice_id
     t.integer :client_id
     t.integer :patient_id
@@ -44,25 +43,22 @@ ActiveRecord::Schema.define do
     t.timestamps null: false
   end
 
-  create_table(:clients) do |t|
+  create_table :clients, primary_key: 'client_id' do |t|
     t.integer :source_id
-    t.integer :client_id
     t.integer :practice_id
     t.string :first_name
     t.string :last_name
     t.timestamps null: false
   end
 
-  create_table(:patients) do |t|
+  create_table :patients, primary_key: 'patient_id' do |t|
     t.integer :source_id
-    t.integer :patient_id
     t.integer :practice_id
     t.timestamps null: false
   end
 
-  create_table(:owners) do |t|
+  create_table :owners, primary_key: 'owner_id' do |t|
     t.integer :source_id
-    t.integer :owner_id
     t.integer :practice_id
     t.integer :client_id
     t.integer :patient_id
@@ -70,7 +66,7 @@ ActiveRecord::Schema.define do
     t.timestamps null: false
   end
 
-  create_table(:requests) do |t|
+  create_table :requests do |t|
     t.integer :practice_id
     t.integer :source_id
     t.integer :client_id
@@ -79,9 +75,8 @@ ActiveRecord::Schema.define do
     t.timestamps null: false
   end
 
-  create_table(:appointments) do |t|
+  create_table :appointments, primary_key: 'appointment_id' do |t|
     t.integer :source_id
-    t.integer :appointment_id
     t.integer :practice_id
     t.integer :client_id
     t.integer :patient_id
@@ -119,11 +114,17 @@ ActiveRecord::Schema.define do
     t.text :settings
   end
 
-  create_table(:reminders) do |t|
+  create_table :reminders, primary_key: 'reminder_id' do |t|
     t.integer :source_id
-    t.integer :reminder_id
     t.integer :practice_id
     t.integer :patient_id
+    t.timestamps null: false
+  end
+
+  create_table(:alerts) do |t|
+    t.string :type
+    t.integer :alertable_id
+    t.string :alertable_type
   end
 end
 
@@ -235,6 +236,10 @@ end
 
 class Filter < ActiveRecord::Base
   belongs_to :communication_setting
+end
+
+class Alert < ActiveRecord::Base
+  belongs_to :alertable, polymorphic: true
 end
 
 class FabricateTest < ActiveSupport::TestCase
