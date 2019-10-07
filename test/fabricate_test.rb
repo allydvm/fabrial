@@ -96,12 +96,26 @@ ActiveRecord::Schema.define do
   create_table(:schedule_categories) do |t|
     t.integer :schedule_id
     t.timestamps null: false
+    t.integer :appointment_length
+  end
+
+  create_table(:schedule_entries) do |t|
+    t.integer :category_id
+    t.timestamps null: false
+    t.integer :start_time
+  end
+
+  create_table(:communication_settings) do |t|
+    t.timestamps null: false
   end
 
   create_table(:filters) do |t|
     t.string :type
     t.string :settings
+    t.integer :communication_setting_id
     t.timestamps null: false
+    t.string :type
+    t.text :settings
   end
 
   create_table(:reminders) do |t|
@@ -189,9 +203,19 @@ end
 
 class Schedule < ActiveRecord::Base
   belongs_to :practice
+  has_many :categories
+  # has_many :appointment_types, autosave: true
 end
 
-class Filter < ActiveRecord::Base
+class Schedule::Category < ActiveRecord::Base
+  belongs_to :schedule, class_name: '::Schedule'
+  has_many :entries
+  # has_and_belongs_to_many :appointment_types
+end
+
+class Schedule::Entry < ActiveRecord::Base
+  belongs_to :category
+  # has_many :break_times, autosave: true
 end
 
 class Reminder < ActiveRecord::Base
@@ -200,13 +224,16 @@ class Reminder < ActiveRecord::Base
   belongs_to :patient
 end
 
-class Schedule::Category < ActiveRecord::Base
-  belongs_to :schedule, class_name: '::Schedule'
-  # has_many :entries, autosave: true
-  # has_and_belongs_to_many :appointment_types
+class CommunicationSetting < ActiveRecord::Base
+  # has_one :trigger
+  has_many :filters
+  # has_many :media
+  # has_many :communication_records
+  # belongs_to :owner, polymorphic: true
 end
 
 class Filter < ActiveRecord::Base
+  belongs_to :communication_setting
 end
 
 class FabricateTest < ActiveSupport::TestCase
@@ -288,14 +315,16 @@ class FabricateTest < ActiveSupport::TestCase
   end
 
   describe 'practice assignment' do
-    test 'Default practice is created' do
-      Fabrial.fabricate client: {}
-      assert_equal MakeObjectTree::DEFAULT_PRACTICE_ID, Practice.first.id
-    end
-    test 'Default practice is used, if practice is not parent' do
-      Fabrial.fabricate client: {}
-      assert_equal MakeObjectTree::DEFAULT_PRACTICE_ID, Client.first.practice_id
-    end
+    # TO REMOVE:
+    # test 'Default practice is created' do
+    #   Fabrial.fabricate client: {}
+    #   assert_equal MakeObjectTree::DEFAULT_PRACTICE_ID, Practice.first.id
+    # end
+    # test 'Default practice is used, if practice is not parent' do
+    #   Fabrial.fabricate client: {}
+    #   assert_equal MakeObjectTree::DEFAULT_PRACTICE_ID, Client.first.practice_id
+    # end
+
     test 'Parent practice is used' do
       Fabrial.fabricate practice: { id: 7, client: {} }
       assert_equal 7, Client.first.practice_id
@@ -429,7 +458,7 @@ class FabricateTest < ActiveSupport::TestCase
     test 'can nest them' do
       Fabrial.fabricate schedule: {
         Schedule::Category => { appointment_length: 20,
-          Schedule::Entry => { start_time: TimeOfDay.parse('8am') } }
+          Schedule::Entry => { start_time: 8 } }
       }
       assert_equal 1, Schedule.first.categories.first.entries.count
     end
