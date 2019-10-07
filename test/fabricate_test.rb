@@ -107,7 +107,7 @@ class Enterprise < ActiveRecord::Base
   has_many :practices, through: :enterprise_memberships
 end
 
-class EnterpriseMembership < ActiveRecord:Base
+class EnterpriseMembership < ActiveRecord::Base
   belongs_to :enterprise
   belongs_to :practice
 end
