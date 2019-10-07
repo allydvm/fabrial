@@ -351,19 +351,21 @@ class FabricateTest < ActiveSupport::TestCase
       assert_equal 1, Practice.count # default created practice
       assert_equal 2, Practice.first.source_id
     end
-    describe "doesn't create defaults if no_default: true" do
-      test 'default source and practice created above enterprise' do
-        Fabrial.fabricate enterprise: { source: { practice: {} } }
-        assert_equal 2, Source.count
-        assert_equal 2, Practice.count
-      end
-      test 'no defaults created' do
-        Fabrial.fabricate NO_DEFAULTS: true,
-          enterprise: { source: { practice: {} } }
-        assert_equal 1, Source.count
-        assert_equal 1, Practice.count
-      end
-    end
+
+    # TO REMOVE:
+    # describe "doesn't create defaults if no_default: true" do
+    #   test 'default source and practice created above enterprise' do
+    #     Fabrial.fabricate enterprise: { source: { practice: {} } }
+    #     assert_equal 2, Source.count
+    #     assert_equal 2, Practice.count
+    #   end
+    #   test 'no defaults created' do
+    #     Fabrial.fabricate NO_DEFAULTS: true,
+    #       enterprise: { source: { practice: {} } }
+    #     assert_equal 1, Source.count
+    #     assert_equal 1, Practice.count
+    #   end
+    # end
   end
 
   describe 'child connections' do
