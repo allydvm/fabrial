@@ -2,12 +2,6 @@
 
 # TODO: properly hook up parent associations for pre-created objects passed in
 
-# TODO: Add hook for default practice and source
-# TODO: Add hook for transforming objects before creation
-
-# TODO: fix this rubocop instead of disabling
-# rubocop:disable Metrics/ModuleLength - this will have some things factored out
-# for the generic stuff, then this disable can be removed
 module Fabrial::Fabricate
   # Make expects a nested hash of type => data or [data]
   def fabricate(objects)
@@ -82,6 +76,7 @@ module Fabrial::Fabricate
       if klass.nil?
         raise Fabrial::UnknownClassError, "Class #{type} does not exist"
       end
+
       returns.concat make_type klass, data, ancestors
     end
     returns
@@ -235,4 +230,3 @@ module Fabrial::Fabricate
   #   p ? { object: p } : { id: DEFAULT_PRACTICE_ID }
   # end
 end
-# rubocop:enable Metrics/ModuleLength

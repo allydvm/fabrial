@@ -473,9 +473,10 @@ class FabricateTest < ActiveSupport::TestCase
 
   describe 'implicit objects' do
     test 'owner record is created for patient under client' do
-      Fabrial.before_create do |klass, data, ancestors, children|
-        return unless klass == Patient && ancestors.key?(Client)
-        children.reverse_merge! owner: {} unless children.key? :owner
+      Fabrial.before_create do |klass, _data, ancestors, children|
+        if klass == Patient && ancestors.key?(Client)
+          children.reverse_merge! owner: {} unless children.key? :owner
+        end
       end
       Fabrial.fabricate practice: { client: { patient: {} } }
       owner = Owner.first
