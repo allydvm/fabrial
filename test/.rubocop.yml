@@ -1,0 +1,14 @@
+inherit_from: ../.rubocop.yml
+
+# Test classes are allowed to be very long because they can contain a lot of
+# test casese
+Metrics/ClassLength: { Enabled: false }
+
+# All tests are blocks
+Metrics/BlockLength: { Enabled: false }
+
+# We often times create micro classes for tests with single line methods
+Style/SingleLineMethods: { Enabled: false }
+
+# Method definitions get weird in tests.
+Lint/NestedMethodDefinition: { Enabled: false }

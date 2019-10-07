@@ -3,6 +3,9 @@
 # TODO: properly hook up parent associations for pre-created objects passed in
 # TODO: Split out the default practice and sync client into its own file
 
+# TODO: fix this rubocop instead of disabling
+# rubocop:disable Metrics/ModuleLength - this will have some things factored out
+# for the generic stuff, then this disable can be removed
 module Fabrial::Fabricate
   # Make expects a nested hash of type => data or [data]
   def fabricate(objects)
@@ -207,14 +210,17 @@ module Fabrial::Fabricate
   end
 
   DEFAULT_SOURCE_ID = -123
+  public_constant :DEFAULT_SOURCE_ID
   def default_source
     c = Source.find_by id: DEFAULT_SOURCE_ID
     c ? { object: c } : { id: DEFAULT_SOURCE_ID }
   end
 
   DEFAULT_PRACTICE_ID = -456
+  public_constant :DEFAULT_PRACTICE_ID
   def default_practice
     p = Practice.find_by id: DEFAULT_PRACTICE_ID
     p ? { object: p } : { id: DEFAULT_PRACTICE_ID }
   end
 end
+# rubocop:enable Metrics/ModuleLength
