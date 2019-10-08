@@ -4,12 +4,15 @@ require 'test_helper'
 
 ActiveRecord::Base.establish_connection(adapter: 'sqlite3', database: ':memory:')
 ActiveRecord::Migration.verbose = false
+
+# Uncomment this to log all SQL queries executed
 # ActiveRecord::Base.logger = Logger.new(STDOUT)
 
+# TODO: Consolidate these models to few that support all the test cases.  Or
+# maybe define some of the wierder test cases right in the test?
 ActiveRecord::Schema.define do
   create_table(:sources) do |t|
     t.string :name
-    t.string :client_class
     t.timestamps null: false
   end
 
@@ -57,6 +60,13 @@ ActiveRecord::Schema.define do
     t.string :first_name
     t.string :last_name
     t.timestamps null: false
+  end
+
+  create_table :client_classes, primary_key: 'client_class_id' do |t|
+    t.integer :source_id
+    t.integer :practice_id
+    t.timestamps null: false
+    # t.string :description
   end
 
   create_table :patients, primary_key: 'patient_id' do |t|
@@ -203,6 +213,11 @@ class Client < ActiveRecord::Base
   has_many :communication_records
 end
 
+class ClientClass < ActiveRecord::Base
+  belongs_to :practice
+  has_many :clients
+end
+
 class Patient < ActiveRecord::Base
   has_many :reminders
   belongs_to :source
@@ -281,6 +296,8 @@ class Alert < ActiveRecord::Base
 end
 
 class FabricateTest < ActiveSupport::TestCase
+  after { Fabrial.reset }
+
   describe 'return values' do
     test 'return top object (Practice) from single tree' do
       object = Fabrial.fabricate practice: { id: 5, client: {} }
@@ -360,10 +377,13 @@ class FabricateTest < ActiveSupport::TestCase
 
   describe 'practice assignment' do
     # TO REMOVE:
-    # test 'Default practice is created' do
-    #   Fabrial.fabricate client: {}
-    #   assert_equal MakeObjectTree::DEFAULT_PRACTICE_ID, Practice.first.id
-    # end
+    test 'Default practice is created' do
+      Fabrial.before_fabricate do |objects|
+        { practice: { id: 234 }.merge(objects) }
+      end
+      Fabrial.fabricate client: {}
+      assert_equal 234, Practice.first.id
+    end
     # test 'Default practice is used, if practice is not parent' do
     #   Fabrial.fabricate client: {}
     #   assert_equal MakeObjectTree::DEFAULT_PRACTICE_ID, Client.first.practice_id
@@ -383,14 +403,14 @@ class FabricateTest < ActiveSupport::TestCase
       Fabrial.fabricate practice: { id: 3, client: { practice: practice } }
       assert_equal 2, Client.first.practice_id
     end
-    test 'specifying source attaches default practice' do
-      Fabrial.fabricate source: { id: 2, client: {} }
-      assert_equal 1, Source.count
-      assert_equal 1, Practice.count # default created practice
-      assert_equal 2, Practice.first.source_id
-    end
 
     # TO REMOVE:
+    # test 'specifying source attaches default practice' do
+    #   Fabrial.fabricate source: { id: 2, client: {} }
+    #   assert_equal 1, Source.count
+    #   assert_equal 1, Practice.count # default created practice
+    #   assert_equal 2, Practice.first.source_id
+    # end
     # describe "doesn't create defaults if no_default: true" do
     #   test 'default source and practice created above enterprise' do
     #     Fabrial.fabricate enterprise: { source: { practice: {} } }
@@ -453,40 +473,45 @@ class FabricateTest < ActiveSupport::TestCase
 
   describe 'implicit objects' do
     test 'owner record is created for patient under client' do
-      Fabrial.fabricate client: { patient: {} }
+      Fabrial.before_create do |klass, _data, ancestors, children|
+        if klass == Patient && ancestors.key?(Client)
+          children.reverse_merge! owner: {} unless children.key? :owner
+        end
+      end
+      Fabrial.fabricate practice: { client: { patient: {} } }
       owner = Owner.first
       assert_equal Client.first.client_id, owner.client_id
       assert_equal Patient.first.patient_id, owner.patient_id
     end
-    test 'owner record created for client under patient' do
-      Fabrial.fabricate patient: { client: {} }
-      owner = Owner.first
-      assert_equal Client.first.client_id, owner.client_id
-      assert_equal Patient.first.patient_id, owner.patient_id
-    end
-    test 'owner record used under patient under client' do
-      Fabrial.fabricate client: { patient: { owner: { percentage: 50 } } }
-      owner = Owner.first
-      assert_equal 1, Owner.count
-      assert_equal 50, owner.percentage
-      assert_equal Client.first.client_id, owner.client_id
-      assert_equal Patient.first.patient_id, owner.patient_id
-    end
-    test 'owner record used under client under patient' do
-      Fabrial.fabricate patient: { client: { owner: { percentage: 50 } } }
-      owner = Owner.first
-      assert_equal 1, Owner.count
-      assert_equal 50, owner.percentage
-      assert_equal Client.first.client_id, owner.client_id
-      assert_equal Patient.first.patient_id, owner.patient_id
-    end
-    test 'membership created for practice under enterprise' do
-      Fabrial.fabricate NO_DEFAULTS: true,
-        source: { enterprise: { practice: {} } }
-      member = EnterpriseMembership.first
-      assert_equal Enterprise.first.id, member.enterprise_id
-      assert_equal Practice.first.id, member.practice_id
-    end
+    # TO REMOVE:
+    # test 'owner record created for client under patient' do
+    #   Fabrial.fabricate patient: { client: {} }
+    #   owner = Owner.first
+    #   assert_equal Client.first.client_id, owner.client_id
+    #   assert_equal Patient.first.patient_id, owner.patient_id
+    # end
+    # test 'owner record used under patient under client' do
+    #   Fabrial.fabricate client: { patient: { owner: { percentage: 50 } } }
+    #   owner = Owner.first
+    #   assert_equal 1, Owner.count
+    #   assert_equal 50, owner.percentage
+    #   assert_equal Client.first.client_id, owner.client_id
+    #   assert_equal Patient.first.patient_id, owner.patient_id
+    # end
+    # test 'owner record used under client under patient' do
+    #   Fabrial.fabricate patient: { client: { owner: { percentage: 50 } } }
+    #   owner = Owner.first
+    #   assert_equal 1, Owner.count
+    #   assert_equal 50, owner.percentage
+    #   assert_equal Client.first.client_id, owner.client_id
+    #   assert_equal Patient.first.patient_id, owner.patient_id
+    # end
+    # test 'membership created for practice under enterprise' do
+    #   Fabrial.fabricate source: { enterprise: { practice: {} } }
+    #   member = EnterpriseMembership.first
+    #   assert_equal Enterprise.first.id, member.enterprise_id
+    #   assert_equal Practice.first.id, member.practice_id
+    # end
   end
 
   describe 'models inside modules' do
@@ -544,5 +569,13 @@ class FabricateTest < ActiveSupport::TestCase
       }
     }
     refute_nil Request.first.content[:comment]
+  end
+
+  test 'throws error if errored while creating object' do
+    Fabrial.stubs(:create).raises 'die'
+    error = assert_raises Fabrial::CreationError do
+      Fabrial.fabricate client: { first_name: 'Jason' }
+    end
+    assert_equal 'die', error.cause.message
   end
 end

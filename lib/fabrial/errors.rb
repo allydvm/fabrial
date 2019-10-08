@@ -1,7 +1,13 @@
 # frozen_string_literal: true
 
-# rubocop:disable Style/ClassAndModuleChildren - will have more in future
 module Fabrial
   class Error < RuntimeError; end
+  class UnknownClassError < Error; end
+  class CreationError < Error
+    def message
+      return super unless cause
+
+      "#{super}: #{cause.message}"
+    end
+  end
 end
-# rubocop:enable Style/ClassAndModuleChildren

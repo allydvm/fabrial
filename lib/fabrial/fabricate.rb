@@ -1,28 +1,13 @@
 # frozen_string_literal: true
 
 # TODO: properly hook up parent associations for pre-created objects passed in
-# TODO: Split out the default practice and sync client into its own file
 
-# TODO: fix this rubocop instead of disabling
-# rubocop:disable Metrics/ModuleLength - this will have some things factored out
-# for the generic stuff, then this disable can be removed
 module Fabrial::Fabricate
   # Make expects a nested hash of type => data or [data]
   def fabricate(objects)
-    # TODO: Raise error if mixing array and hash return styles
+    objects = Fabrial.run_before_fabricate objects
+    add_default_return objects
 
-    # If a return object(s) wasn't specified, default to returning the first
-    # object.
-    unless contains_return? objects
-      ret = objects.values.find do |v|
-        v.is_a?(Hash) || (v.is_a?(Array) && !v.empty?)
-      end
-      if ret
-        ret = ret.first if ret.is_a? Array
-        ret[:RETURN] = true
-      end
-    end
-    objects = add_defaults objects
     ancestors = {}
     returns = make_types objects, ancestors
 
@@ -32,6 +17,43 @@ module Fabrial::Fabricate
     else
       returns.length <= 1 ? returns.first : returns
     end
+  end
+
+  # If a return object(s) wasn't specified, default to returning the first
+  # object.
+  # TODO: Raise error if mixing array and hash return styles
+  def add_default_return(objects)
+    return if contains_return? objects
+
+    ret = objects.values.find do |v|
+      v.is_a?(Hash) || (v.is_a?(Array) && !v.empty?)
+    end
+    if ret
+      ret = ret.first if ret.is_a? Array
+      ret[:RETURN] = true
+    end
+  end
+
+  def extract_child_records(klass, data)
+    children = data.select do |type, v|
+      # Must have nested data
+      [Array, Hash].any? { |c| v.is_a? c } &&
+        # Must be a class that we can instantiate
+        get_class(type) &&
+
+        # Even if it has the same name as a Model in the system, if it is also
+        # the name of a column in the table, assume the data is for a serialzed
+        # field and not a nested relation.  Ex: Requests have a serialized field
+        # called content and there is also a Content model in the system.
+        (
+          # If they are using a class as the key, then always choose the class
+          # over the field.
+          type.is_a?(Class) ||
+
+          !column_names(klass).include?(type.to_s)
+        )
+    end
+    data.extract!(*children.keys)
   end
 
   private
@@ -45,26 +67,27 @@ module Fabrial::Fabricate
     end
   end
 
+  # TO REMOVE;
   # Setup default source and practice if not provided
-  def add_defaults(objects)
-    return objects if objects.delete :NO_DEFAULTS
+  # def add_defaults(objects)
+  #   return objects if objects.delete :NO_DEFAULTS
 
-    unless %i[source sources].any? { |k| objects.key? k }
-      objects = { source: default_source.merge(objects) }
-    end
+  #   unless %i[source sources].any? { |k| objects.key? k }
+  #     objects = { source: default_source.merge(objects) }
+  #   end
 
-    # We can only make a default practice if we are dealing with a single sync
-    # client.
-    source = objects[:source]
-    if source.is_a?(Hash)
-      unless %i[practice practices].any? { |p| source.key? p }
-        children = extract_child_records Practice, source
-        source[:practice] = default_practice.merge children
-      end
-    end
+  #   # We can only make a default practice if we are dealing with a single sync
+  #   # client.
+  #   source = objects[:source]
+  #   if source.is_a?(Hash)
+  #     unless %i[practice practices].any? { |p| source.key? p }
+  #       children = extract_child_records Practice, source
+  #       source[:practice] = default_practice.merge children
+  #     end
+  #   end
 
-    objects
-  end
+  #   objects
+  # end
 
   # return_skip_levels allows us to skip created default practices and
   # sources when choosing an object to return.
@@ -72,6 +95,10 @@ module Fabrial::Fabricate
     returns = []
     objects.each do |type, data|
       klass = get_class(type)
+      if klass.nil?
+        raise Fabrial::UnknownClassError, "Class #{type} does not exist"
+      end
+
       returns.concat make_type klass, data, ancestors
     end
     returns
@@ -87,7 +114,7 @@ module Fabrial::Fabricate
     Array.wrap(data_list).each do |data|
       should_return = data.delete :RETURN
       children = extract_child_records klass, data
-      add_implicit_owner klass, ancestors, children
+      run_before_create klass, data, ancestors, children
       object = make_object klass, data, associations
 
       # Make sure new object is added as last item of ancestor hash
@@ -116,7 +143,12 @@ module Fabrial::Fabricate
     type_col = klass.inheritance_column.try :to_sym
     type = data.delete(type_col).try :safe_constantize
     type ||= klass
-    create type, data.reverse_merge(associations)
+    begin
+      create type, data.reverse_merge(associations)
+    rescue
+      raise Fabrial::CreationError,
+        "Error creating #{type.name} with data: #{data}"
+    end
   end
 
   def collect_associations(klass, ancestors)
@@ -127,28 +159,6 @@ module Fabrial::Fabricate
     associations
   end
 
-  def extract_child_records(klass, data)
-    children = data.select do |type, v|
-      # Must have nested data
-      [Array, Hash].any? { |c| v.is_a? c } &&
-        # Must be a class that we can instantiate
-        get_class(type) &&
-
-        # Even if it has the same name as a Model in the system, if it is also
-        # the name of a column in the table, assume the data is for a serialzed
-        # field and not a nested relation.  Ex: Requests have a serialized field
-        # called content and there is also a Content model in the system.
-        (
-          # If they are using a class as the key, then always choose the class
-          # over the field.
-          type.is_a?(Class) ||
-
-            !column_names(klass).include?(type.to_s)
-        )
-    end
-    data.extract!(*children.keys)
-  end
-
   def column_names(klass)
     klass.column_names
 
@@ -156,18 +166,19 @@ module Fabrial::Fabricate
     # klass.column_names_including_stored
   end
 
-  def add_implicit_owner(klass, ancestors, children)
-    {
-      [Client, Patient] => Owner,
-      [Enterprise, Practice] => EnterpriseMembership,
-    }. each do |connected, connector|
-      next unless (connected.delete klass) && (ancestors.key? connected[0])
+  # TO REMOVE:
+  # def add_implicit_owner(klass, ancestors, children)
+  #   {
+  #     [Client, Patient] => Owner,
+  #     [Enterprise, Practice] => EnterpriseMembership,
+  #   }. each do |connected, connector|
+  #     next unless (connected.delete klass) && (ancestors.key? connected[0])
 
-      unless children.key? connector.name.demodulize.underscore.to_sym
-        children.reverse_merge! connector => {}
-      end
-    end
-  end
+  #     unless children.key? connector.name.demodulize.underscore.to_sym
+  #       children.reverse_merge! connector => {}
+  #     end
+  #   end
+  # end
 
   def collect_parents(klass, ancestors)
     associations = klass.reflect_on_all_associations
@@ -209,18 +220,18 @@ module Fabrial::Fabricate
       type.to_s.classify.pluralize.safe_constantize
   end
 
-  DEFAULT_SOURCE_ID = -123
-  public_constant :DEFAULT_SOURCE_ID
-  def default_source
-    c = Source.find_by id: DEFAULT_SOURCE_ID
-    c ? { object: c } : { id: DEFAULT_SOURCE_ID }
-  end
-
-  DEFAULT_PRACTICE_ID = -456
-  public_constant :DEFAULT_PRACTICE_ID
-  def default_practice
-    p = Practice.find_by id: DEFAULT_PRACTICE_ID
-    p ? { object: p } : { id: DEFAULT_PRACTICE_ID }
-  end
+  # TO REMOVE:
+  # DEFAULT_SOURCE_ID = -123
+  # public_constant :DEFAULT_SOURCE_ID
+  # def default_source
+  #   c = Source.find_by id: DEFAULT_SOURCE_ID
+  #   c ? { object: c } : { id: DEFAULT_SOURCE_ID }
+  # end
+  #
+  # DEFAULT_PRACTICE_ID = -456
+  # public_constant :DEFAULT_PRACTICE_ID
+  # def default_practice
+  #   p = Practice.find_by id: DEFAULT_PRACTICE_ID
+  #   p ? { object: p } : { id: DEFAULT_PRACTICE_ID }
+  # end
 end
-# rubocop:enable Metrics/ModuleLength

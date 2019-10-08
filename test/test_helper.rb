@@ -11,6 +11,7 @@ require 'minitest/autorun'
 require 'minitest/reporters'
 require 'minitest/focus'
 require 'database_cleaner'
+require 'mocha/setup'
 
 if ENV['CONTINUOUS_INTEGRATION']
   Minitest::Reporters.use! Minitest::Reporters::DefaultReporter.new(color: true)

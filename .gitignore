@@ -7,6 +7,9 @@
 /spec/reports/
 /tmp/
 
+# Gems should not commit `Gemfile.lock`
+Gemfile.lock
+
 # Appraisal gemfiles
 /gemfiles/.bundle/
 /gemfiles/*.gemfile.lock
