@@ -37,4 +37,13 @@ module Create
     -> { serializer.next }
   end
   alias :sn :serial_number
+
+  def serial_alpha(start='a')
+    lambda do
+      temp = start
+      start = start.succ
+      temp
+    end
+  end
+  alias :sa :serial_alpha
 end
